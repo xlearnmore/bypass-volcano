@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Fully Bypass Volcano
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Auto Fully Bypass Volcano
+// @version      1.1
+// @description  Fix lỗi stuck
 // @author       DyRian (based on IHaxU)
 // @match        https://key.volcano.wtf/*
 // @match        https://work.ink/*
