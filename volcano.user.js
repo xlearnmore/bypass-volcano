@@ -2,7 +2,7 @@
 // @name         Auto Fully Bypass Volcano
 // @namespace    http://tampermonkey.net/
 // @version      1.3
-// @description  Update Time Bypass + Fix Stuck, Detection
+// @description  Update Bypass Timer + Fix Stuck, Detection
 // @author       DyRian (based on IHaxU)
 // @match        https://key.volcano.wtf/*
 // @match        https://work.ink/*
