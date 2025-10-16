@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Bypass Volcano
 // @namespace    http://tampermonkey.net/
-// @version      1.6.0.9
+// @version      1.6.1.0
 // @description  You only need to solve the captcha
 // @author       DyRian (based on IHaxU)
 // @match        https://key.volcano.wtf/*
