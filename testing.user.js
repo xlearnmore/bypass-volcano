@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dyrian Bypass
 // @namespace    Testing
-// @version      0.0.1
+// @version      0.0.2
 // @description  You only need to solve the captcha
 // @author       DyRian (based on IHaxU)
 // @match        https://key.volcano.wtf/*
