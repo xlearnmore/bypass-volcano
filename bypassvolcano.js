@@ -599,18 +599,24 @@
             bypassTriggered = true;
             if (debug) console.log('[Debug] trigger Bypass via:', reason);
             if (panel) panel.show('captchaSuccessBypassing', 'success');
-            try {
+            
+            if (debug) console.log('[Debug] Phase 1: Firing initial 5x spoof burst');
+            for (let i = 0; i < 5; i++) {
                 spoofWorkink();
-                if (debug) console.log('[Debug] spoof Workink completed');
-            } catch (e) {
-                if (debug) console.warn('[Debug] spoof Workink failed:', e);
             }
-            try {
-                triggerBp();
-                if (debug) console.log('[Debug] trigger Bypass completed');
-            } catch (e) {
-                if (debug) console.warn('[Debug] trigger Bypass failed:', e);
-            }
+            
+            setTimeout(() => {
+                const dest = getFunction(sessionController, map.onLD);
+                if (dest.fn && !sessionController?.linkDestination) {
+                    if (debug) console.log('[Debug] Phase 2: 5s passed, no destination. Firing fallback burst');
+                    for (let i = 0; i < 5; i++) {
+                        spoofWorkink();
+                    }
+                } else {
+                    if (debug) console.log('[Debug] Phase 2: Destination already received, skipping fallback');
+                }
+            }, 5000);         
+            if (debug) console.log('[Debug] Waiting for server to send destination data...');
         }
 
         function spoofWorkink() {
