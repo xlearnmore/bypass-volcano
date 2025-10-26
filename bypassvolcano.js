@@ -15,6 +15,7 @@
             redirectingToWork: "Đang qua Work.ink...",
             bypassSuccessCopy: "Bypass thành công, đã Copy Key (bấm 'Cho Phép' nếu có)",
             waitingCaptcha: "Đang chờ CAPTCHA...",
+            pleaseReload: "Vui lòng tải lại trang...(workink lỗi)",
             bypassSuccess: "Bypass thành công, chờ {time}s...",
             backToCheckpoint: "Đang về lại Checkpoint...",
             captchaSuccessBypassing: "CAPTCHA đã thành công, đang bypass...",
@@ -28,6 +29,7 @@
             redirectingToWork: "Redirecting to Work.ink...",
             bypassSuccessCopy: "Bypass successful! Key copied (click 'Allow' if prompted)",
             waitingCaptcha: "Waiting for CAPTCHA...",
+            pleaseReload: "Please reload the page...(workink bugs)",
             bypassSuccess: "Bypass successful, waiting {time}s...",
             backToCheckpoint: "Returning to checkpoint...",
             captchaSuccessBypassing: "CAPTCHA solved successfully, bypassing...",
@@ -950,6 +952,7 @@
                                     } else {
                                         gtdRetryCount++;
                                         if (debug) console.log(`[Debug] GTD retry ${gtdRetryCount}s: Still waiting for linkInfo...`);
+                                        if (panel) panel.show('pleaseReload', 'info');
                                         setTimeout(checkAndTriggerGTD, 1000);
                                     }
                                 }
