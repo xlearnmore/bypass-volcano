@@ -13,18 +13,12 @@
             pleaseSolveCaptcha: "Vui lòng giải CAPTCHA để tiếp tục",
             captchaSuccess: "CAPTCHA đã thành công",
             redirectingToWork: "Đang qua Work.ink...",
-            clickingContinue: "Đã click nút Continue",
-            errorClickingContinue: "Lỗi khi click Continue",
-            autoClickCopy: "Đã auto click nút copy key",
             bypassSuccessCopy: "Bypass thành công, đã Copy Key (bấm 'Cho Phép' nếu có)",
-            errorCopy: "Lỗi khi copy key",
-            copyButtonNotFound: "Không tìm thấy nút copy",
             waitingCaptcha: "Đang chờ CAPTCHA...",
-            successDetected: "Đã detect success, chuẩn bị click...",
             bypassSuccess: "Bypass thành công, chờ {time}s...",
             backToCheckpoint: "Đang về lại Checkpoint...",
             captchaSuccessBypassing: "CAPTCHA đã thành công, đang bypass...",
-            version: "Phiên bản v1.6.2.2",
+            version: "Phiên bản v1.6.2.3",
             madeBy: "Được tạo bởi DyRian (dựa trên IHaxU)"
         },
         en: {
@@ -32,18 +26,12 @@
             pleaseSolveCaptcha: "Please solve the CAPTCHA to continue",
             captchaSuccess: "CAPTCHA solved successfully",
             redirectingToWork: "Redirecting to Work.ink...",
-            clickingContinue: "Continue button clicked",
-            errorClickingContinue: "Error clicking the Continue button",
-            autoClickCopy: "Automatically clicked the copy key button",
             bypassSuccessCopy: "Bypass successful! Key copied (click 'Allow' if prompted)",
-            errorCopy: "Error copying the key",
-            copyButtonNotFound: "Copy button not found",
             waitingCaptcha: "Waiting for CAPTCHA...",
-            successDetected: "Success detected, preparing to click...",
             bypassSuccess: "Bypass successful, waiting {time}s...",
             backToCheckpoint: "Returning to checkpoint...",
             captchaSuccessBypassing: "CAPTCHA solved successfully, bypassing...",
-            version: "Version v1.6.2.2",
+            version: "Version v1.6.2.3",
             madeBy: "Made by DyRian (based on IHaxU)"
         }
     };
@@ -551,6 +539,7 @@
         }
     }
 
+
     // Handler for WORK.INK
     function handleWorkInk() {
         if (panel) panel.show('pleaseSolveCaptcha', 'info');
@@ -561,6 +550,7 @@
         let onLinkInfoA = undefined;
         let onLinkDestinationA = undefined;
         let bypassTriggered = false;
+        let destinationReceived = false;
 
         const map = {
             onLI: ["onLinkInfo"],
@@ -613,7 +603,7 @@
 
             setTimeout(() => {
                 const dest = getFunction(sessionController, map.onLD);
-                if (dest.fn && !sessionController?.linkDestination) {
+                if (!destinationReceived) {
                     if (debug) console.log('[Debug] Phase 2: 5s passed, no destination. Firing fallback burst');
                     for (let i = 0; i < 5; i++) {
                         spoofWorkink();
@@ -631,54 +621,73 @@
                 return;
             }
             if (debug) console.log('[Debug] spoof Workink starting, linkInfo:', sessionController.linkInfo);
-            for (const soc of sessionController.linkInfo.socials || []) {
-                if (sendMessageA) {
-                    sendMessageA.call(this, types.ss, { url: soc.url });
-                    if (debug) console.log('[Debug] Faked social:', soc.url);
-                } else {
-                    if (debug) console.warn('[Debug] No send message for social:', soc.url);
+            
+            const socials = sessionController.linkInfo.socials || [];
+            if (debug) console.log('[Debug] Total socials to fake:', socials.length);
+            
+            for (let i = 0; i < socials.length; i++) {
+                const soc = socials[i];
+                try {
+                    if (sendMessageA) {
+                        sendMessageA.call(this, types.ss, { url: soc.url });
+                        if (debug) console.log(`[Debug] Faked social [${i+1}/${socials.length}]:`, soc.url);
+                    } else {
+                        if (debug) console.warn(`[Debug] No send message for social [${i+1}/${socials.length}]:`, soc.url);
+                    }
+                } catch (e) {
+                    if (debug) console.error(`[Debug] Error faking social [${i+1}/${socials.length}]:`, soc.url, e);
                 }
             }
-            for (const monetization of sessionController.linkInfo.monetizations || []) {
-                let type, payload;
-                switch (monetization) {
-                    case 22:
-                        sendMessageA && sendMessageA.call(this, types.mo, { type: 'readArticles2', payload: { event: 'read' } });
-                        if (debug) console.log('[Debug] Faked readArticles2');
-                        break;
-                    case 25:
-                        type = 'operaGX'; payload = { event: 'installClicked' };
-                        sendMessageA && sendMessageA.call(this, types.mo, { type: 'operaGX', payload: { event: 'start' } });
-                        fetch('https://work.ink/_api/v2/callback/operaGX', {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ noteligible: true })
-                        }).catch((e) => { if (debug) console.warn('[Debug] operaGX fetch failed:', e); });
-                        if (debug) console.log('[Debug] Faked operaGX');
-                        break;
-                    case 34:
-                        type = 'norton'; payload = { event: 'installClicked' };
-                        sendMessageA && sendMessageA.call(this, types.mo, { type: 'norton', payload: { event: 'start' } });
-                        if (debug) console.log('[Debug] Faked norton install');
-                        break;
-                    case 71:
-                        type = 'externalArticles'; payload = { event: 'installClicked' };
-                        sendMessageA && sendMessageA.call(this, types.mo, { type: 'externalArticles', payload: { event: 'start' } });
-                        if (debug) console.log('[Debug] Faked externalArticles');
-                        break;
-                    case 45:
-                        sendMessageA && sendMessageA.call(this, types.mo, { type: 'pdfeditor', payload: { event: 'installed' } });
-                        if (debug) console.log('[Debug] Faked pdfeditor install');
-                        break;
-                    case 57:
-                        sendMessageA && sendMessageA.call(this, types.mo, { type: 'betterdeals', payload: { event: 'installed' } });
-                        if (debug) console.log('[Debug] Faked betterdeals install');
-                        break;
-                    default:
-                        if (debug) console.log('[Debug] Unknown monetization:', monetization);
+            
+            const monetizations = sessionController.linkInfo.monetizations || [];
+            if (debug) console.log('[Debug] Total monetizations to fake:', monetizations.length);
+            
+            for (let i = 0; i < monetizations.length; i++) {
+                const monetization = monetizations[i];
+                try {
+                    switch (monetization) {
+                        case 22:
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'readArticles2', payload: { event: 'read' } });
+                            if (debug) console.log(`[Debug] Faked readArticles2 [${i+1}/${monetizations.length}]`);
+                            break;
+                        case 25:
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'operaGX', payload: { event: 'start' } });
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'operaGX', payload: { event: 'installClicked' } });
+                            fetch('https://work.ink/_api/v2/callback/operaGX', {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ noteligible: true })
+                            }).catch((e) => { if (debug) console.warn('[Debug] operaGX fetch failed:', e); });
+                            if (debug) console.log(`[Debug] Faked operaGX [${i+1}/${monetizations.length}]`);
+                            break;
+                        case 34:
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'norton', payload: { event: 'start' } });
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'norton', payload: { event: 'installClicked' } });
+                            if (debug) console.log(`[Debug] Faked norton [${i+1}/${monetizations.length}]`);
+                            break;
+                        case 71:
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'externalArticles', payload: { event: 'start' } });
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'externalArticles', payload: { event: 'installClicked' } });
+                            if (debug) console.log(`[Debug] Faked externalArticles [${i+1}/${monetizations.length}]`);
+                            break;
+                        case 45:
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'pdfeditor', payload: { event: 'installed' } });
+                            if (debug) console.log(`[Debug] Faked pdfeditor [${i+1}/${monetizations.length}]`);
+                            break;
+                        case 57:
+                            sendMessageA && sendMessageA.call(this, types.mo, { type: 'betterdeals', payload: { event: 'installed' } });
+                            if (debug) console.log(`[Debug] Faked betterdeals [${i+1}/${monetizations.length}]`);
+                            break;
+                        default:
+                            if (debug) console.log(`[Debug] Unknown monetization [${i+1}/${monetizations.length}]:`, monetization);
+                    }
+                } catch (e) {
+                    if (debug) console.error(`[Debug] Error faking monetization [${i+1}/${monetizations.length}]:`, monetization, e);
                 }
             }
+            
+            if (debug) console.log('[Debug] spoof Workink completed');
         }
 
         function trm() {
@@ -740,6 +749,7 @@
             return function(...args) {
                 const [data] = args;
                 const secondsPassed = (Date.now() - startTime) / 1000;
+                destinationReceived = true;
                 if (debug) console.log('[Debug] Destination data:', data);
 
                 let waitTimeSeconds = 5;
@@ -756,25 +766,6 @@
                 }
                 return onLinkDestinationA ? onLinkDestinationA.apply(this, args): undefined;
             };
-        }
-
-        function triggerBp() {
-            if (!sessionController) {
-                if (debug) console.log('[Debug] triggerBp: sessionController not ready');
-                return;
-            }
-
-            const dest = getFunction(sessionController, map.onLD);
-            if (!dest.fn) {
-                if (debug) console.log('[Debug] triggerBp: destination function not found');
-                return;
-            }
-
-            if (sessionController.linkDestination) {
-                createDestinationProxy().call(sessionController, sessionController.linkDestination);
-            } else {
-                if (debug) console.log('[Debug] triggerBp: waiting for linkDestination...');
-            }
         }
 
         function setupProxies() {
@@ -896,30 +887,75 @@
             };
         }
 
+        window.googletag = {cmd: [], _loaded_: true};
+
+        const blockedClasses = [
+            "adsbygoogle",
+            "adsense-wrapper",
+            "inline-ad",
+            "gpt-billboard-container"
+        ];
+
+        const blockedIds = [
+            "billboard-1",
+            "billboard-2",
+            "billboard-3",
+            "sidebar-ad-1",
+            "skyscraper-ad-1"
+        ];
+
         setupInterception();
 
         const ob = new MutationObserver(mutations => {
             for (const m of mutations) {
                 for (const node of m.addedNodes) {
                     if (node.nodeType === 1) {
-                        if (node.classList?.contains("adsbygoogle")) {
-                            node.remove();
-                            if (debug) console.log('[Debug]: Removed injected ad', node);
-                        }
-                        node.querySelectorAll?.('.adsbygoogle, [id*=ad], [id*=container]').forEach((el) => {
-                            el.remove();
-                            if (debug) console.log('[Debug]: Removed nested ad', el);
+                        blockedClasses.forEach((cls) => {
+                            if (node.classList?.contains(cls)) {
+                                node.remove();
+                                if (debug) console.log('[Debug]: Removed ad by class:', cls, node);
+                            }
+                            node.querySelectorAll?.(`.${cls}`).forEach((el) => {
+                                el.remove();
+                                if (debug) console.log('[Debug]: Removed nested ad by class:', cls, el);
+                            });
                         });
+                        
+                        blockedIds.forEach((id) => {
+                            if (node.id === id) {
+                                node.remove();
+                                if (debug) console.log('[Debug]: Removed ad by id:', id, node);
+                            }
+                            node.querySelectorAll?.(`#${id}`).forEach((el) => {
+                                el.remove();
+                                if (debug) console.log('[Debug]: Removed nested ad by id:', id, el);
+                            });
+                        });
+                        
                         if (node.matches('.button.large.accessBtn.pos-relative.svelte-bv7qlp') && node.textContent.includes('Go To Destination')) {
                             if (debug) console.log('[Debug] GTD button detected');
-
+                            
                             if (!bypassTriggered) {
-                                if (sessionController && getFunction(sessionController, map.onLD).fn) {
-                                    triggerBypass('gtd');
-                                    if (debug) console.log('[Debug] Captcha bypassed via GTD:', node);
-                                } else {
-                                    if (debug) console.log('[Debug] GTD detected but sessionController not ready, waiting for TR instead');
+                                if (debug) console.log('[Debug] GTD: Waiting for linkInfo...');
+                                
+                                let gtdRetryCount = 0;
+                                
+                                function checkAndTriggerGTD() {
+                                    const ctrl = sessionController;
+                                    const dest = getFunction(ctrl, map.onLD);
+                                    
+                                    if (ctrl && ctrl.linkInfo && dest.fn) {
+                                        triggerBypass('gtd');
+                                        if (debug) console.log('[Debug] Captcha bypassed via GTD after', gtdRetryCount, 'seconds');
+                                    } else {
+                                        gtdRetryCount++;
+                                        if (debug) console.log(`[Debug] GTD retry ${gtdRetryCount}s: Still waiting for linkInfo...`);
+                                        setTimeout(checkAndTriggerGTD, 1000);
+                                    }
                                 }
+                                
+                                checkAndTriggerGTD();
+                                
                             } else {
                                 if (debug) console.log('[Debug] GTD ignored: bypass already triggered via TR');
                             }
