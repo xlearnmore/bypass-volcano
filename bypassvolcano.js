@@ -4,7 +4,7 @@
     const host = location.hostname; // check host
     const debug = true // enable debug logs (console)
 
-    let currentLanguage = localStorage.getItem('lang') || 'en'; // default language: vi/en
+    let currentLanguage = localStorage.getItem('lang') || 'vi'; // default language: vi/en
 
     // Translations
     const translations = {
@@ -24,7 +24,7 @@
             bypassSuccess: "Bypass thành công, chờ {time}s...",
             backToCheckpoint: "Đang về lại Checkpoint...",
             captchaSuccessBypassing: "CAPTCHA đã thành công, đang bypass...",
-            version: "Phiên bản v1.6.2.1",
+            version: "Phiên bản v1.6.2.2",
             madeBy: "Được tạo bởi DyRian (dựa trên IHaxU)"
         },
         en: {
@@ -43,7 +43,7 @@
             bypassSuccess: "Bypass successful, waiting {time}s...",
             backToCheckpoint: "Returning to checkpoint...",
             captchaSuccessBypassing: "CAPTCHA solved successfully, bypassing...",
-            version: "Version v1.6.2.1",
+            version: "Version v1.6.2.2",
             madeBy: "Made by DyRian (based on IHaxU)"
         }
     };
@@ -550,6 +550,7 @@
             }
         }
     }
+
     // Handler for WORK.INK
     function handleWorkInk() {
         if (panel) panel.show('pleaseSolveCaptcha', 'info');
@@ -560,13 +561,18 @@
         let onLinkInfoA = undefined;
         let onLinkDestinationA = undefined;
         let bypassTriggered = false;
-        //
+
         const map = {
             onLI: ["onLinkInfo"],
             onLD: ["onLinkDestination"]
         };
 
         function getFunction(obj, candidates = null) {
+            if (!obj) {
+                if (debug) console.log('[Debug] getFunction: obj is null/undefined');
+                return { fn: null, index: -1, name: null };
+            }
+
             if (candidates) {
                 for (let i = 0; i < candidates.length; i++) {
                     const name = candidates[i];
@@ -599,12 +605,12 @@
             bypassTriggered = true;
             if (debug) console.log('[Debug] trigger Bypass via:', reason);
             if (panel) panel.show('captchaSuccessBypassing', 'success');
-            
+
             if (debug) console.log('[Debug] Phase 1: Firing initial 5x spoof burst');
             for (let i = 0; i < 5; i++) {
                 spoofWorkink();
             }
-            
+
             setTimeout(() => {
                 const dest = getFunction(sessionController, map.onLD);
                 if (dest.fn && !sessionController?.linkDestination) {
@@ -615,7 +621,7 @@
                 } else {
                     if (debug) console.log('[Debug] Phase 2: Destination already received, skipping fallback');
                 }
-            }, 5000);         
+            }, 5000);
             if (debug) console.log('[Debug] Waiting for server to send destination data...');
         }
 
@@ -753,8 +759,21 @@
         }
 
         function triggerBp() {
-            if (sessionController?.linkDestination) {
+            if (!sessionController) {
+                if (debug) console.log('[Debug] triggerBp: sessionController not ready');
+                return;
+            }
+
+            const dest = getFunction(sessionController, map.onLD);
+            if (!dest.fn) {
+                if (debug) console.log('[Debug] triggerBp: destination function not found');
+                return;
+            }
+
+            if (sessionController.linkDestination) {
                 createDestinationProxy().call(sessionController, sessionController.linkDestination);
+            } else {
+                if (debug) console.log('[Debug] triggerBp: waiting for linkDestination...');
             }
         }
 
@@ -892,8 +911,18 @@
                             if (debug) console.log('[Debug]: Removed nested ad', el);
                         });
                         if (node.matches('.button.large.accessBtn.pos-relative.svelte-bv7qlp') && node.textContent.includes('Go To Destination')) {
-                            triggerBypass('gtd');
-                            if (debug) console.log('[Debug] Captcha bypassed via GTD:', node);
+                            if (debug) console.log('[Debug] GTD button detected');
+
+                            if (!bypassTriggered) {
+                                if (sessionController && getFunction(sessionController, map.onLD).fn) {
+                                    triggerBypass('gtd');
+                                    if (debug) console.log('[Debug] Captcha bypassed via GTD:', node);
+                                } else {
+                                    if (debug) console.log('[Debug] GTD detected but sessionController not ready, waiting for TR instead');
+                                }
+                            } else {
+                                if (debug) console.log('[Debug] GTD ignored: bypass already triggered via TR');
+                            }
                         }
                     }
                 }
@@ -902,5 +931,3 @@
         ob.observe(document.documentElement, { childList: true, subtree: true });
     }
 })();
-
-
