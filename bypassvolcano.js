@@ -1,5 +1,6 @@
-(function () {
+(() => {
     'use strict';
+
 
     const host = location.hostname; // check host
     const debug = true // enable debug logs (console)
@@ -19,7 +20,7 @@
             bypassSuccess: "Bypass thành công, chờ {time}s...",
             backToCheckpoint: "Đang về lại Checkpoint...",
             captchaSuccessBypassing: "CAPTCHA đã thành công, đang bypass...",
-            version: "Phiên bản v1.6.2.3",
+            version: "Phiên bản v1.6.2.4",
             madeBy: "Được tạo bởi DyRian (dựa trên IHaxU)"
         },
         en: {
@@ -33,12 +34,11 @@
             bypassSuccess: "Bypass successful, waiting {time}s...",
             backToCheckpoint: "Returning to checkpoint...",
             captchaSuccessBypassing: "CAPTCHA solved successfully, bypassing...",
-            version: "Version v1.6.2.3",
+            version: "Version v1.6.2.4",
             madeBy: "Made by DyRian (based on IHaxU)"
         }
     };
 
-    // Translation function
     function t(key, replacements = {}) {
         let text = translations[currentLanguage][key] || key;
         Object.keys(replacements).forEach(placeholder => {
@@ -47,7 +47,6 @@
         return text;
     }
 
-    // Bypass Panel (UI)
     class BypassPanel {
         constructor() {
             this.container = null;
@@ -431,16 +430,11 @@
     }
 
     let panel = null;
-    setTimeout(() => {
-        panel = new BypassPanel();
-        panel.show('pleaseSolveCaptcha', 'info');
-    }, 100);
+    setTimeout(() => { panel = new BypassPanel(); panel.show('pleaseSolveCaptcha', 'info'); }, 100);
 
-    // Check host and run corresponding handlers
     if (host.includes("key.volcano.wtf")) handleVolcano();
     else if (host.includes("work.ink")) handleWorkInk();
 
-    // Handler for VOLCANO
     function handleVolcano() {
         if (panel) panel.show('pleaseSolveCaptcha', 'info');
         if (debug) console.log('[Debug] Waiting Captcha');
@@ -541,8 +535,6 @@
         }
     }
 
-
-    // Handler for WORK.INK
     function handleWorkInk() {
         if (panel) panel.show('pleaseSolveCaptcha', 'info');
 
@@ -560,24 +552,28 @@
         };
 
         function getFunction(obj, candidates = null) {
-            if (!obj) {
-                if (debug) console.log('[Debug] getFunction: obj is null/undefined');
-                return { fn: null, index: -1, name: null };
-            }
+            try {
+                if (!obj || typeof obj !== "object") {
+                    return { fn: null, index: -1, name: null };
+                }
 
-            if (candidates) {
-                for (let i = 0; i < candidates.length; i++) {
-                    const name = candidates[i];
-                    if (typeof obj[name] === "function") {
-                        return { fn: obj[name], index: i, name };
+                if (Array.isArray(candidates)) {
+                    for (let i = 0; i < candidates.length; i++) {
+                        const name = candidates[i];
+                        if (typeof obj[name] === "function") {
+                            return { fn: obj[name], index: i, name };
+                        }
                     }
                 }
-            } else {
-                for (let i in obj) {
-                    if (typeof obj[i] == "function" && obj[i].length == 2) {
-                        return { fn: obj[i], name: i };
+
+                for (const key in obj) {
+                    const val = obj[key];
+                    if (typeof val === "function" && val.length === 2) {
+                        return { fn: val, name: key };
                     }
                 }
+            } catch (err) {
+                if (debug) console.warn("[Debug] getFunction exception:", err);
             }
             return { fn: null, index: -1, name: null };
         }
