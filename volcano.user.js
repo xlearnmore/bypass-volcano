@@ -1,15 +1,15 @@
 // ==UserScript==
-// @name         Auto Bypass Volcano
+// @name         Xlearnmore Volcano Bypass
 // @namespace    http://tampermonkey.net/
-// @version      1.6.2.4
+// @version      1.6.2.6
 // @description  You only need to solve the captcha
-// @author       DyRian (based on IHaxU)
+// @author       Reworked by Xlearnmore (based on IHaxU & DyRian)
 // @match        https://key.volcano.wtf/*
 // @match        https://work.ink/*
 // @run-at       document-start
 // @grant        unsafeWindow
 // @icon         https://i.postimg.cc/y6Gx5NBD/volcano.png
-// @downloadURL  https://github.com/dyr14n/bypass/raw/main/volcano.user.js
-// @updateURL    https://github.com/dyr14n/bypass/raw/main/volcano.user.js
-// @require      https://github.com/dyr14n/bypass/raw/main/bypassvolcano.js
+// @downloadURL  https://github.com/xlearnmore/bypass-volcano/raw/main/volcano.user.js
+// @updateURL    https://github.com/xlearnmore/bypass-volcano/raw/main/volcano.user.js
+// @require      https://github.com/xlearnmore/bypass-volcano/raw/main/bypassvolcano.js
 // ==/UserScript==
