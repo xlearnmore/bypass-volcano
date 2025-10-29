@@ -672,14 +672,22 @@
 function createDestinationProxy() {
             return function(...args) {
                 const [data] = args;
+                const secondsPassed = (Date.now() - startTime) / 1000;
                 destinationReceived = true;
                 if (debug) console.log('[Debug] Destination data:', data);
 
-                // --- MODIFIKASI: LANGSUNG REDIRECT ---
-                if (panel) panel.show('backToCheckpoint', 'info');
-                redirect(data.url); // Langsung ke URL tujuan
+                // --- MODIFIKASI: PAKSA 5 DETIK ---
+                let waitTimeSeconds = 5; // Selalu diatur ke 5 detik
+                // const url = location.href; // Baris ini tidak diperlukan lagi
+                // Logika 'if' untuk 38 detik dihapus
                 // --- AKHIR MODIFIKASI ---
 
+                if (secondsPassed >= waitTimeSeconds) {
+                    if (panel) panel.show('backToCheckpoint', 'info');
+                    redirect(data.url);
+                } else {
+                    startCountdown(data.url, waitTimeSeconds - secondsPassed);
+                }
                 return onLinkDestinationA ? onLinkDestinationA.apply(this, args): undefined;
             };
         }
