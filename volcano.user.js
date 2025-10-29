@@ -8,8 +8,11 @@
 // @match        https://work.ink/*
 // @run-at       document-start
 // @grant        unsafeWindow
+// @grant        GM_registerMenuCommand
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @icon         https://i.postimg.cc/y6Gx5NBD/volcano.png
 // @downloadURL  https://github.com/xlearnmore/bypass-volcano/raw/main/volcano.user.js
 // @updateURL    https://github.com/xlearnmore/bypass-volcano/raw/main/volcano.user.js
-// @require      https://github.com/xlearnmore/bypass-volcano/raw/main/bypassvolcano-newupdate.js
+// @require      https://github.com/xlearnmore/bypass-volcano/raw/main/bypassvolcano.js?v=1.6.2.9
 // ==/UserScript==

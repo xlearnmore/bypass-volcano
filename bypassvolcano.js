@@ -2,8 +2,17 @@
     'use strict';
 
     const host = location.hostname; // check host
-    const debug = true // enable debug logs (console)
+    // --- MODIFIKASI: DEBUG TOGGLE ---
+    let debug = GM_getValue('debugMode', false); // Ambil status debug, default 'false'
+    if (debug) console.log('[Debug] Mode debug AKTIF.');
 
+    // Daftarkan tombol menu
+    GM_registerMenuCommand('Toggle Debug Mode', () => {
+        debug = !debug;
+        GM_setValue('debugMode', debug);
+        alert(`Debug mode is now: ${debug ? 'ON' : 'OFF'}\nReload page to apply.`);
+    });
+    // --- AKHIR MODIFIKASI ---
     // Bahasa diatur ke 'en' secara permanen
     let currentLanguage = 'en';
 
@@ -20,7 +29,7 @@
             bypassSuccess: "Bypass successful, waiting {time}s...",
             backToCheckpoint: "Returning to checkpoint...",
             captchaSuccessBypassing: "CAPTCHA solved successfully, bypassing...",
-            version: "Version v1.6.2.9",
+            version: "Version v1.6.2.6",
             madeBy: "Rework by Xlearnmore (based on IHaxU & DyRian)"
         }
     };
@@ -402,14 +411,19 @@
                 }
             }
 
-            const copyBtn = node && node.nodeType === 1
-                ? node.matches("#copy-key-btn, .copy-btn, [aria-label='Copy']")
-                    ? node
-                    : node.querySelector("#copy-key-btn, .copy-btn, [aria-label='Copy']")
-                : document.querySelector("#copy-key-btn, .copy-btn, [aria-label='Copy']");
-            if (copyBtn) {
+const copyBtn = node && node.nodeType === 1
+            ? node.matches("#copy-key-btn, .copy-btn, [aria-label='Copy']")
+            ? node
+            : node.querySelector("#copy-key-btn, .copy-btn, [aria-label='Copy']")
+            : document.querySelector("#copy-key-btn, .copy-btn, [aria-label='Copy']");
+            
+            // --- MODIFIKASI DISINI ---
+            if (copyBtn && !alreadyDoneCopy) { // <- Tambahkan '!alreadyDoneCopy'
+                alreadyDoneCopy = true;     // <- Tambahkan ini
+                if (debug) console.log('[Debug] Tombol Copy ditemukan, memulai spam-click.');
+
                 setInterval(() => {
-                    try {
+                     try {
                         copyBtn.click();
                         if (debug) console.log('[Debug] Copy button spam click');
                         if (panel) panel.show('bypassSuccessCopy', 'success');
@@ -669,28 +683,28 @@
             }, 1000);
         }
 
-function createDestinationProxy() {
-            return function(...args) {
-                const [data] = args;
-                const secondsPassed = (Date.now() - startTime) / 1000;
-                destinationReceived = true;
-                if (debug) console.log('[Debug] Destination data:', data);
+        function createDestinationProxy() {
+            return function(...args) {
+                const [data] = args;
+                const secondsPassed = (Date.now() - startTime) / 1000;
+                destinationReceived = true;
+                if (debug) console.log('[Debug] Destination data:', data);
 
-                // --- MODIFIKASI: PAKSA 5 DETIK ---
-                let waitTimeSeconds = 5; // Selalu diatur ke 5 detik
-                // const url = location.href; // Baris ini tidak diperlukan lagi
-                // Logika 'if' untuk 38 detik dihapus
-                // --- AKHIR MODIFIKASI ---
+                let waitTimeSeconds = 5;
+                const url = location.href;
+                if (url.includes('42rk6hcq') || url.includes('ito4wckq') || url.includes('pzarvhq1')) {
+                    waitTimeSeconds = 38;
+                }
 
-                if (secondsPassed >= waitTimeSeconds) {
-                    if (panel) panel.show('backToCheckpoint', 'info');
-                    redirect(data.url);
-                } else {
-                    startCountdown(data.url, waitTimeSeconds - secondsPassed);
-                }
-                return onLinkDestinationA ? onLinkDestinationA.apply(this, args): undefined;
-            };
-        }
+                if (secondsPassed >= waitTimeSeconds) {
+                    if (panel) panel.show('backToCheckpoint', 'info');
+                    redirect(data.url);
+                } else {
+                    startCountdown(data.url, waitTimeSeconds - secondsPassed);
+                }
+                return onLinkDestinationA ? onLinkDestinationA.apply(this, args): undefined;
+            };
+        }
 
         function setupProxies() {
             const send = resolveWriteFunction(sessionController);
@@ -828,7 +842,13 @@ function createDestinationProxy() {
             "skyscraper-ad-1"
         ];
 
-        setupInterception();
+        try {
+            setupInterception();
+            if (debug) console.log('[DEBUG] Interception setup successful.');
+            } catch (e) {
+            if (debug) console.error('[Debug] Interception FAILED. Bypass will not work.', e);
+            panel.show('Bypass failed: Script update needed.', 'error');
+        }
 
         const ob = new MutationObserver(mutations => {
             for (const m of mutations) {
@@ -891,5 +911,4 @@ function createDestinationProxy() {
         });
         ob.observe(document.documentElement, { childList: true, subtree: true });
     }
-
 })();
