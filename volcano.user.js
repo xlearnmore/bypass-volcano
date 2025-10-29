@@ -11,5 +11,5 @@
 // @icon         https://i.postimg.cc/y6Gx5NBD/volcano.png
 // @downloadURL  https://github.com/xlearnmore/bypass-volcano/raw/main/volcano.user.js
 // @updateURL    https://github.com/xlearnmore/bypass-volcano/raw/main/volcano.user.js
-// @require      https://github.com/xlearnmore/bypass-volcano/raw/main/bypassvolcano-update.js
+// @require      https://github.com/xlearnmore/bypass-volcano/raw/main/bypassvolcano-newupdate.js
 // ==/UserScript==
