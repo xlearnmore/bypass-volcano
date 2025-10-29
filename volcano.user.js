@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Xlearnmore Volcano Bypass
-// @namespace    http://tampermonkey.net/
+// @namespace    https://violentmonkey.github.io/
 // @version      1.6.2.6
 // @description  You only need to solve the captcha
 // @author       Reworked by Xlearnmore (based on IHaxU & DyRian)
