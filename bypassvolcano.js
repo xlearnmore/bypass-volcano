@@ -20,7 +20,7 @@
             bypassSuccess: "Bypass successful, waiting {time}s...",
             backToCheckpoint: "Returning to checkpoint...",
             captchaSuccessBypassing: "CAPTCHA solved successfully, bypassing...",
-            version: "Version v1.6.2.6",
+            version: "Version v1.6.2.7",
             madeBy: "Rework by Xlearnmore (based on IHaxU & DyRian)"
         }
     };
@@ -884,3 +884,4 @@ function createDestinationProxy() {
         ob.observe(document.documentElement, { childList: true, subtree: true });
     }
 })();
+
