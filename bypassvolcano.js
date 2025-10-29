@@ -4,26 +4,13 @@
     const host = location.hostname; // check host
     const debug = true // enable debug logs (console)
 
-    let currentLanguage = localStorage.getItem('lang') || 'vi'; // default language: vi/en
+    // Bahasa diatur ke 'en' secara permanen
+    let currentLanguage = 'en';
 
-    // Translations
+    // Translations (hanya 'en' yang tersisa)
     const translations = {
-        vi: {
-            title: "Dyrian Bypass",
-            pleaseSolveCaptcha: "Vui lòng giải CAPTCHA để tiếp tục",
-            captchaSuccess: "CAPTCHA đã thành công",
-            redirectingToWork: "Đang qua Work.ink...",
-            bypassSuccessCopy: "Bypass thành công, đã Copy Key (bấm 'Cho Phép' nếu có)",
-            waitingCaptcha: "Đang chờ CAPTCHA...",
-            pleaseReload: "Vui lòng tải lại trang...(workink lỗi)",
-            bypassSuccess: "Bypass thành công, chờ {time}s...",
-            backToCheckpoint: "Đang về lại Checkpoint...",
-            captchaSuccessBypassing: "CAPTCHA đã thành công, đang bypass...",
-            version: "Phiên bản v1.6.2.4",
-            madeBy: "Được tạo bởi DyRian (dựa trên IHaxU)"
-        },
         en: {
-            title: "Dyrian Bypass",
+            title: "Xlearnmore Volcano",
             pleaseSolveCaptcha: "Please solve the CAPTCHA to continue",
             captchaSuccess: "CAPTCHA solved successfully",
             redirectingToWork: "Redirecting to Work.ink...",
@@ -33,8 +20,8 @@
             bypassSuccess: "Bypass successful, waiting {time}s...",
             backToCheckpoint: "Returning to checkpoint...",
             captchaSuccessBypassing: "CAPTCHA solved successfully, bypassing...",
-            version: "Version v1.6.2.4",
-            madeBy: "Made by DyRian (based on IHaxU)"
+            version: "Version v1.6.2.6",
+            madeBy: "Rework by Xlearnmore (based on IHaxU & DyRian)"
         }
     };
 
@@ -55,7 +42,6 @@
             this.statusDot = null;
             this.versionEl = null;
             this.creditEl = null;
-            this.langBtns = [];
             this.currentMessageKey = null;
             this.currentType = 'info';
             this.currentReplacements = {};
@@ -78,74 +64,94 @@
             style.textContent = `
                 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+                /* --- [START] MODERN UI: NEUMORPHISM + GLASS + SYSTEM THEME --- */
+
                 .panel-container {
                     position: fixed;
                     top: 20px;
                     right: 20px;
                     width: 400px;
                     z-index: 2147483647;
-                    font-family: 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                    
+                    /* --- Variabel Tema Terang (LIGHT MODE) --- */
+                    --glass-bg: rgba(255, 255, 255, 0.6);
+                    --glass-border: rgba(255, 255, 255, 0.75);
+                    --panel-shadow: 0 8px 32px 0 rgba(136, 136, 136, 0.3);
+                    --text-primary: #1F1F1F;
+                    --text-secondary: #4a4a4a;
+                    --accent-color: #667eea;
+                    
+                    /* Variabel Neumorphism (Light) */
+                    --neumorphism-base: #F0F2F5;
+                    --neumorphism-shadow-dark: 5px 5px 10px #bebebe;
+                    --neumorphism-shadow-light: -5px -5px 10px #ffffff;
+                    --neumorphism-shadow-inset-dark: inset 5px 5px 10px #bebebe;
+                    --neumorphism-shadow-inset-light: inset -5px -5px 10px #ffffff;
+                }
+
+                @media (prefers-color-scheme: dark) {
+                    .panel-container {
+                        /* --- Variabel Tema Gelap (DARK MODE) --- */
+                        --glass-bg: rgba(30, 30, 45, 0.7);
+                        --glass-border: rgba(255, 255, 255, 0.1);
+                        --panel-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+                        --text-primary: #EAEAEA;
+                        --text-secondary: #a0a0a0;
+                        --accent-color: #7699ff;
+
+                        /* Variabel Neumorphism (Dark) */
+                        --neumorphism-base: #252830;
+                        --neumorphism-shadow-dark: 5px 5px 12px #1c1e24;
+                        --neumorphism-shadow-light: -5px -5px 12px #2e323c;
+                        --neumorphism-shadow-inset-dark: inset 5px 5px 12px #1c1e24;
+                        --neumorphism-shadow-inset-light: inset -5px -5px 12px #2e323c;
+                    }
                 }
 
                 .panel {
-                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                    /* [STYLE] Glassmorphism */
+                    background: var(--glass-bg);
+                    backdrop-filter: blur(14px);
+                    -webkit-backdrop-filter: blur(14px);
+                    border: 1px solid var(--glass-border);
+                    box-shadow: var(--panel-shadow);
+                    
                     border-radius: 16px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
                     overflow: hidden;
                     animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
                     transition: all 0.3s ease;
                 }
 
                 @keyframes slideIn {
-                    from {
-                        opacity: 0;
-                        transform: translateX(100px) scale(0.9);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(0) scale(1);
-                    }
+                    from { opacity: 0; transform: translateX(100px) scale(0.9); }
+                    to { opacity: 1; transform: translateX(0) scale(1); }
                 }
 
                 .header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: transparent; /* Transparan agar efek glass terlihat */
                     padding: 16px 20px;
                     position: relative;
-                    overflow: hidden;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                }
-
-                .header::before {
-                    content: '';
-                    position: absolute;
-                    top: -50%;
-                    left: -50%;
-                    width: 200%;
-                    height: 200%;
-                    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-                    animation: shine 3s infinite;
-                }
-
-                @keyframes shine {
-                    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-                    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+                    border-bottom: 1px solid var(--glass-border); /* Pemisah tipis */
                 }
 
                 .title {
                     font-size: 20px;
                     font-weight: 700;
-                    color: #fff;
-                    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                    position: relative;
-                    z-index: 1;
+                    color: var(--text-primary);
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
                 }
 
                 .minimize-btn {
-                    background: rgba(255,255,255,0.15);
+                    /* [STYLE] Neumorphism (Outset) */
+                    background: var(--neumorphism-base);
+                    box-shadow: var(--neumorphism-shadow-dark), var(--neumorphism-shadow-light);
                     border: none;
-                    color: #fff;
+                    color: var(--text-secondary);
+                    
                     width: 32px;
                     height: 32px;
                     border-radius: 50%;
@@ -153,45 +159,34 @@
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    transition: all 0.2s;
+                    transition: all 0.2s ease;
                     font-size: 20px;
                     font-weight: 700;
-                    position: relative;
-                    z-index: 1;
                 }
 
                 .minimize-btn:hover {
-                    background: rgba(255,255,255,0.3);
-                    transform: scale(1.1);
+                    color: var(--text-primary);
+                }
+
+                .minimize-btn:active {
+                    /* [STYLE] Neumorphism (Inset - on click) */
+                    box-shadow: var(--neumorphism-shadow-inset-dark), var(--neumorphism-shadow-inset-light);
+                    transform: scale(0.95);
                 }
 
                 .status-section {
                     padding: 20px;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
+                    border-bottom: 1px solid var(--glass-border);
                 }
 
                 .status-box {
-                    background: rgba(255,255,255,0.05);
+                    /* [STYLE] Neumorphism (Inset) */
+                    background: var(--neumorphism-base);
+                    box-shadow: var(--neumorphism-shadow-inset-dark), var(--neumorphism-shadow-inset-light);
+                    
                     border-radius: 12px;
                     padding: 16px;
                     position: relative;
-                    overflow: hidden;
-                }
-
-                .status-box::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
-                    animation: shimmer 2s infinite;
-                }
-
-                @keyframes shimmer {
-                    0% { transform: translateX(-100%); }
-                    100% { transform: translateX(100%); }
                 }
 
                 .status-content {
@@ -222,7 +217,7 @@
                 .status-dot.error { background: #f87171; }
 
                 .status-text {
-                    color: #fff;
+                    color: var(--text-primary);
                     font-size: 14px;
                     font-weight: 500;
                     flex: 1;
@@ -241,65 +236,21 @@
                     opacity: 0;
                 }
 
-                .language-section {
-                    padding: 16px 20px;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                }
-
-                .lang-toggle {
-                    display: flex;
-                    gap: 10px;
-                }
-
-                .lang-btn {
-                    flex: 1;
-                    background: rgba(255,255,255,0.05);
-                    border: 2px solid rgba(255,255,255,0.1);
-                    color: #fff;
-                    padding: 10px;
-                    border-radius: 10px;
-                    cursor: pointer;
-                    font-weight: 600;
-                    font-size: 14px;
-                    transition: all 0.2s;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                }
-
-                .lang-btn:hover {
-                    background: rgba(255,255,255,0.1);
-                    transform: translateY(-2px);
-                }
-
-                .lang-btn.active {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    border-color: #667eea;
-                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-                }
-
                 .info-section {
                     padding: 16px 20px;
-                    background: rgba(0,0,0,0.2);
+                    background: transparent;
                 }
 
-                .version {
-                    color: rgba(255,255,255,0.6);
+                .version, .credit {
+                    color: var(--text-secondary);
                     font-size: 12px;
                     font-weight: 500;
                     margin-bottom: 8px;
                     text-align: center;
-                }
-
-                .credit {
-                    color: rgba(255,255,255,0.6);
-                    font-size: 12px;
-                    font-weight: 500;
-                    text-align: center;
-                    margin-bottom: 8px;
                 }
 
                 .credit-author {
-                    color: #667eea;
+                    color: var(--accent-color);
                     font-weight: 700;
                 }
 
@@ -311,14 +262,14 @@
                 }
 
                 .links a {
-                    color: #667eea;
+                    color: var(--accent-color);
                     text-decoration: none;
                     transition: all 0.2s;
                 }
 
                 .links a:hover {
-                    color: #764ba2;
                     text-decoration: underline;
+                    opacity: 0.8;
                 }
 
                 @media (max-width: 480px) {
@@ -329,6 +280,7 @@
                         width: auto;
                     }
                 }
+                /* --- [END] MODERN UI --- */
             `;
 
             this.shadow.appendChild(style);
@@ -349,12 +301,6 @@
                             </div>
                         </div>
                         <div class="panel-body" id="panel-body">
-                            <div class="language-section">
-                                <div class="lang-toggle">
-                                    <button class="lang-btn ${currentLanguage === 'vi' ? 'active' : ''}" data-lang="vi">Tiếng Việt</button>
-                                    <button class="lang-btn ${currentLanguage === 'en' ? 'active' : ''}" data-lang="en">English</button>
-                                </div>
-                            </div>
                             <div class="info-section">
                                 <div class="version" id="version">${t('version')}</div>
                                 <div class="credit" id="credit">
@@ -379,7 +325,6 @@
             this.statusDot = this.shadow.querySelector('#status-dot');
             this.versionEl = this.shadow.querySelector('#version');
             this.creditEl = this.shadow.querySelector('#credit');
-            this.langBtns = Array.from(this.shadow.querySelectorAll('.lang-btn'));
             this.body = this.shadow.querySelector('#panel-body');
             this.minimizeBtn = this.shadow.querySelector('#minimize-btn');
 
@@ -387,34 +332,11 @@
         }
 
         setupEventListeners() {
-            this.langBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    currentLanguage = btn.dataset.lang;
-                    this.updateLanguage();
-                });
-            });
-
             this.minimizeBtn.addEventListener('click', () => {
                 this.isMinimized = !this.isMinimized;
                 this.body.classList.toggle('hidden');
                 this.minimizeBtn.textContent = this.isMinimized ? '+' : '−';
             });
-        }
-
-        updateLanguage() {
-            localStorage.setItem('lang', currentLanguage);
-
-            this.langBtns.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
-            });
-
-            this.shadow.querySelector('.title').textContent = t('title');
-            this.versionEl.textContent = t('version');
-            this.creditEl.textContent = t('madeBy');
-
-            if (this.currentMessageKey) {
-                this.show(this.currentMessageKey, this.currentType, this.currentReplacements);
-            }
         }
 
         show(messageKey, type = 'info', replacements = {}) {
@@ -431,6 +353,7 @@
     let panel = null;
     setTimeout(() => { panel = new BypassPanel(); panel.show('pleaseSolveCaptcha', 'info'); }, 100);
 
+    
     if (host.includes("key.volcano.wtf")) handleVolcano();
     else if (host.includes("work.ink")) handleWorkInk();
 
