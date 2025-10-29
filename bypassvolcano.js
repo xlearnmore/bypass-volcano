@@ -669,28 +669,20 @@
             }, 1000);
         }
 
-        function createDestinationProxy() {
-            return function(...args) {
-                const [data] = args;
-                const secondsPassed = (Date.now() - startTime) / 1000;
-                destinationReceived = true;
-                if (debug) console.log('[Debug] Destination data:', data);
+function createDestinationProxy() {
+            return function(...args) {
+                const [data] = args;
+                destinationReceived = true;
+                if (debug) console.log('[Debug] Destination data:', data);
 
-                let waitTimeSeconds = 5;
-                const url = location.href;
-                if (url.includes('42rk6hcq') || url.includes('ito4wckq') || url.includes('pzarvhq1')) {
-                    waitTimeSeconds = 38;
-                }
+                // --- MODIFIKASI: LANGSUNG REDIRECT ---
+                if (panel) panel.show('backToCheckpoint', 'info');
+                redirect(data.url); // Langsung ke URL tujuan
+                // --- AKHIR MODIFIKASI ---
 
-                if (secondsPassed >= waitTimeSeconds) {
-                    if (panel) panel.show('backToCheckpoint', 'info');
-                    redirect(data.url);
-                } else {
-                    startCountdown(data.url, waitTimeSeconds - secondsPassed);
-                }
-                return onLinkDestinationA ? onLinkDestinationA.apply(this, args): undefined;
-            };
-        }
+                return onLinkDestinationA ? onLinkDestinationA.apply(this, args): undefined;
+            };
+        }
 
         function setupProxies() {
             const send = resolveWriteFunction(sessionController);
